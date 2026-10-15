@@ -1,0 +1,18 @@
+{
+  "extMyExtension.title": "Tiện ích của tôi",
+  "extMyExtension.sub": "Trang demo nằm trong module my-extension.",
+  "extMyExtension.loaded.title": "Được tải từ tiện ích",
+  "extMyExtension.loaded.body": "Màn hình này đến từ my-extension v{version}, được build vào ứng dụng cùng các màn hình lõi.",
+  "extMyExtension.facts.title": "Về tiện ích này",
+  "extMyExtension.facts.unit": "Tiện ích",
+  "extMyExtension.facts.version": "Phiên bản",
+  "extMyExtension.facts.route": "Route của nó",
+  "extMyExtension.facts.status": "Route phản hồi",
+  "extMyExtension.status.asking": "Đang hỏi…",
+  "extMyExtension.status.answered": "Đã phản hồi",
+  "extMyExtension.status.failed": "Không phản hồi",
+  "extMyExtension.pingAgain": "Hỏi lại",
+  "extMyExtension.state.title": "Thử xem",
+  "extMyExtension.state.count": "Đã bấm {count} lần.",
+  "extMyExtension.state.click": "Bấm"
+}

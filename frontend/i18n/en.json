@@ -1,0 +1,18 @@
+{
+  "extMyExtension.title": "My extension",
+  "extMyExtension.sub": "A demo page shipped inside the my-extension module.",
+  "extMyExtension.loaded.title": "Loaded from the extension",
+  "extMyExtension.loaded.body": "This screen came from my-extension v{version}, built into the app with the core screens.",
+  "extMyExtension.facts.title": "About this extension",
+  "extMyExtension.facts.unit": "Extension",
+  "extMyExtension.facts.version": "Version",
+  "extMyExtension.facts.route": "Its route",
+  "extMyExtension.facts.status": "Route answers",
+  "extMyExtension.status.asking": "Asking…",
+  "extMyExtension.status.answered": "Answered",
+  "extMyExtension.status.failed": "No answer",
+  "extMyExtension.pingAgain": "Ask again",
+  "extMyExtension.state.title": "Try it",
+  "extMyExtension.state.count": "Clicked {count} times.",
+  "extMyExtension.state.click": "Click"
+}

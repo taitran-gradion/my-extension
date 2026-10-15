@@ -1,0 +1,18 @@
+{
+  "extMyExtension.title": "Meine Erweiterung",
+  "extMyExtension.sub": "Eine Demoseite aus dem Modul my-extension.",
+  "extMyExtension.loaded.title": "Aus der Erweiterung geladen",
+  "extMyExtension.loaded.body": "Diese Seite stammt aus my-extension v{version} und wurde mit den Kernseiten in die App gebaut.",
+  "extMyExtension.facts.title": "Über diese Erweiterung",
+  "extMyExtension.facts.unit": "Erweiterung",
+  "extMyExtension.facts.version": "Version",
+  "extMyExtension.facts.route": "Ihre Route",
+  "extMyExtension.facts.status": "Route antwortet",
+  "extMyExtension.status.asking": "Frage…",
+  "extMyExtension.status.answered": "Antwortet",
+  "extMyExtension.status.failed": "Keine Antwort",
+  "extMyExtension.pingAgain": "Erneut fragen",
+  "extMyExtension.state.title": "Ausprobieren",
+  "extMyExtension.state.count": "{count}-mal geklickt.",
+  "extMyExtension.state.click": "Klicken"
+}
