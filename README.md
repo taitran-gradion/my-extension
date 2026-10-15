@@ -15,14 +15,15 @@ A Margince extension unit. It ships:
 Needs Go, pnpm, Docker and rsync, the same as Margince core.
 
 ```bash
-make install   # once: fetch core at margince.version, install its tools
+make install   # once: fetch core at margince.ref, install its tools
 make dev       # core with this unit composed in; prints the app port
 make test      # this unit's tests
 make check     # every core gate against this unit, before a release
 make stop      # stop the dev stack
 ```
 
-Core is fetched into `.margince/core` (ignored) at the tag in `margince.version`. Each target
+Core is fetched into `.margince/core` (ignored) at the commit in `margince.ref`, from the fork
+that carries the `extensions.mod` POC. Each target
 copies this folder into `.margince/core/extensions/my-extension/`, so edit files here and never
 in the copy. `make dev` must run again after a Go change; the frontend reloads on its own.
 
