@@ -1,0 +1,5 @@
+*/.margince/
+*/bin/
+*/.run/
+*/.run.typecheck.log
+*/config/

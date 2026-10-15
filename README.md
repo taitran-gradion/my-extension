@@ -10,24 +10,41 @@ A Margince extension unit. It ships:
 `Version` in `myextension.go`, `version` in `api/crm.yaml` and `UNIT_VERSION` in
 `frontend/screen.tsx` move together with the release tag.
 
-## Develop
+## Develop against several core versions
 
-Needs Go, pnpm, Docker and rsync, the same as Margince core.
+`infra/` holds one thin Margince instance per core version this extension supports:
+
+| Instance | Core | App |
+|---|---|---|
+| `infra/core-v0.0.6` | `v0.0.6-poc.1` | http://localhost:8191 |
+| `infra/core-v0.0.7` | `v0.0.7-poc.2` | http://localhost:8192 |
+
+Each instance loads the extension from this repository's root (`replace … => ../..` in its
+`go.mod` and `extensions.mod`), so every edit here is what runs: Vite reloads the screen, and
+the Go side needs `make up` again. Each fetches its own core at the version its `go.mod` names,
+into its own ignored `.margince/`. `infra/` is made of nested Go modules, so none of it ships in
+this extension's module zip.
+
+Needs Go, pnpm and Docker, and the local Postgres, Redis and object store that `make dev` in
+Margince core starts.
 
 ```bash
-make install   # once: fetch core at margince.ref, install its tools
-make dev       # core with this unit composed in; prints the app port
-make test      # this unit's tests
-make check     # every core gate against this unit, before a release
-make stop      # stop the dev stack
+make test        # Go tests, against every core version
+make typecheck   # the composed app with this screen, against every core version
+make check       # both, before a release
+make up V=core-v0.0.6   # run one instance (default: the newest)
+make stop        # stop every instance
+make work        # go.work for your editor, core from the newest instance
 ```
 
-Core is fetched into `.margince/core` (ignored) at the commit in `margince.ref`, from the fork
-that carries the `extensions.mod` POC. Each target
-copies this folder into `.margince/core/extensions/my-extension/`, so edit files here and never
-in the copy. `make dev` must run again after a Go change; the frontend reloads on its own.
+To support another core version, copy an `infra/core-*` folder, change the version in its
+`go.mod` (all four `replace` lines), and give its `Makefile` its own ports, database and Redis
+number.
 
 ## Install into a Margince build
 
-Copy this folder, without `.margince/`, to `extensions/my-extension/` in the Margince tree and
-run `make composition`. The folder being there turns the unit on.
+Require it in the installation's `extensions.mod`:
+
+```text
+require github.com/taitran-gradion/my-extension <version>
+```

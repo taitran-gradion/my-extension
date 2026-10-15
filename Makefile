@@ -1,57 +1,39 @@
-# This repository is one Margince extension unit; its root IS the unit.
+# This repository is one Margince extension; its root IS the extension module.
 #
-# Core composes only units that sit, as real folders, under its own extensions/
-# (a symlinked unit is refused). So every target fetches core at the pinned commit
-# into .margince/core and syncs this folder to .margince/core/extensions/$(NAME).
-# Edit here, never in the copy: the next sync overwrites it.
+# infra/ holds one thin instance per core version the extension supports. Each
+# loads the extension from this root (replace => ../..) and fetches its own
+# core, so the same working copy is tested against every version. infra/ is a
+# set of nested Go modules, so none of it ships in the extension's module zip.
 
-NAME     := my-extension
-CORE     := .margince/core
-UNIT     := $(CORE)/extensions/$(NAME)
-REF      := $(shell cat margince.ref)
-# The fork that carries the extensions.mod POC (margince/margince#7727).
-CORE_URL ?= https://github.com/taitran-gradion/margince
-# A separate clone is a primary worktree, which would take the shared `margince`
-# database and :8080; a slug gives this stack its own.
-CORE_MAKE = $(MAKE) -C $(CORE) DEV_SLUG=$(NAME)
+INSTANCES := $(patsubst infra/%/Makefile,%,$(wildcard infra/*/Makefile))
+# The newest instance answers editor lookups (go.work) when no V= is given.
+V ?= $(lastword $(INSTANCES))
 
-.PHONY: help core install sync compose dev test check stop clean
+.PHONY: help test typecheck check up stop work clean
 
 help: ## List the targets
-	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-8s %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
+	@echo "  instances: $(INSTANCES)"
 
-core: ## Fetch core at the commit in margince.ref (again only when it changes)
-	@if [ "$$(git -C $(CORE) rev-parse HEAD 2>/dev/null)" != "$(REF)" ]; then \
-	  rm -rf $(CORE) && git init -q $(CORE) && git -C $(CORE) fetch -q --depth 1 $(CORE_URL) $(REF) \
-	  && git -C $(CORE) -c advice.detachedHead=false checkout -q FETCH_HEAD; \
-	fi
-	@test -f go.work || go work init . ./$(CORE)/backend
+test: ## The extension's Go tests, against every core version
+	@for i in $(INSTANCES); do echo "== $$i"; $(MAKE) -s -C infra/$$i test || exit 1; done
 
-install: core ## One-time core toolchain and frontend install
-	$(CORE_MAKE) fe-install tools
+typecheck: ## The composed SPA with this screen type-checks, against every core version
+	@for i in $(INSTANCES); do $(MAKE) -s -C infra/$$i install typecheck || exit 1; done
 
-sync: core
-	@mkdir -p $(UNIT)
-	@# Core's gates refuse a git-ignored unit, and core ignores /extensions/* but its own.
-	@grep -qxF '!/extensions/$(NAME)' $(CORE)/.gitignore || echo '!/extensions/$(NAME)' >> $(CORE)/.gitignore
-	@rsync -a --delete --exclude=/.margince/ --exclude=/.git/ --exclude=node_modules/ \
-	  --exclude=/go.work --exclude=/go.work.sum --exclude=/manifest.generated.json ./ $(UNIT)/
+check: test typecheck ## Both, before a release
 
-compose: sync ## Compose core with this unit and bring its manifest back here
-	$(CORE_MAKE) composition
-	@cp $(UNIT)/manifest.generated.json .
+up: ## Run one instance: make up V=core-v0.0.6 (default: the newest)
+	@$(MAKE) -s -C infra/$(V) up
 
-dev: compose ## Run core with this unit (re-run after a Go change)
-	$(CORE_MAKE) dev
+stop: ## Stop every instance
+	@for i in $(INSTANCES); do $(MAKE) -s -C infra/$$i stop; done
 
-test: compose ## This unit's own tests
-	$(CORE_MAKE) test-extensions
+work: ## Write go.work so an editor resolves core from instance V
+	@$(MAKE) -s -C infra/$(V) core
+	@rm -f go.work go.work.sum && go work init . ./infra/$(V)/.margince/core/backend
+	@echo "go.work: core from infra/$(V)"
 
-check: compose ## Every core gate, the extension gates included, against this unit
-	$(CORE_MAKE) check
-
-stop: ## Stop this unit's dev stack
-	@test ! -d $(CORE) || $(CORE_MAKE) dev-stop
-
-clean: stop ## Remove the fetched core
-	rm -rf .margince go.work go.work.sum
+clean: ## Stop and remove every instance's core clone and binaries
+	@for i in $(INSTANCES); do $(MAKE) -s -C infra/$$i clean; done
+	rm -f go.work go.work.sum
